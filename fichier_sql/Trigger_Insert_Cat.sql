@@ -1,0 +1,15 @@
+create or replace NONEDITIONABLE TRIGGER InsertCategorie
+BEFORE INSERT ON Categories FOR EACH ROW
+DECLARE 
+    v_categorie NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_categorie FROM Categories WHERE categorie = :NEW.categorie;
+    IF v_categorie != 0 THEN 
+        RAISE_APPLICATION_ERROR(-20001,'La categorie existe déjà');
+    END IF;
+
+    :NEW.numCat := num_categorie_sequence.NEXTVAL;
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Erreur Oracle : ' || SQLCODE || ' ; Message Oracle : ' || SQLERRM);
+END;
