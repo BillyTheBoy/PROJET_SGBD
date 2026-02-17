@@ -1,4 +1,4 @@
-create or replace NONEDITIONABLE TRIGGER InsertCategorie
+CREATE OR REPLACE NONEDITIONABLE TRIGGER InsertCategorie
 BEFORE INSERT ON Categories FOR EACH ROW
 DECLARE 
     v_categorie NUMBER;

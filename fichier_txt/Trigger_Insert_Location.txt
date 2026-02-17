@@ -1,4 +1,4 @@
-create or replace NONEDITIONABLE TRIGGER InsertionLocation
+CREATE OR REPLACE NONEDITIONABLE TRIGGER InsertionLocation
 BEFORE INSERT ON Location FOR EACH ROW
 DECLARE 
         v_nbjours formules.nbJours%TYPE;

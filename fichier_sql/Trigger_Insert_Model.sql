@@ -1,6 +1,6 @@
 -- Creation d'un trigger pour l'insertion dans Modeles
 
-create or replace NONEDITIONABLE TRIGGER InsertionModeles
+CREATE OR REPLACE NONEDITIONABLE TRIGGER InsertionModeles
 BEFORE INSERT ON Modeles FOR EACH ROW
 DECLARE 
         v_numCat Categories.numCat%TYPE;

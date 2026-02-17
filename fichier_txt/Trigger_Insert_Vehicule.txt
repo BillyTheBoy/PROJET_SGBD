@@ -1,4 +1,4 @@
-create or replace NONEDITIONABLE TRIGGER insertionVehicule
+CREATE OR REPLACE NONEDITIONABLE TRIGGER insertionVehicule
 BEFORE INSERT ON Vehicule FOR EACH ROW
 DECLARE
     v_modele NUMBER;
