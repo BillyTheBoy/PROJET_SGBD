@@ -1,3 +1,5 @@
+-- Creation d'un trigger pour l'insertion dans Modeles
+
 CREATE OR REPLACE NONEDITIONABLE TRIGGER InsertionModeles
 BEFORE INSERT ON Modeles FOR EACH ROW
 DECLARE 
@@ -17,3 +19,5 @@ EXCEPTION
     WHEN OTHERS THEN
         RAISE_APPLICATION_ERROR(-20003,'Erreur Oracle : ' || SQLCODE || ' ; Message Oracle : ' || SQLERRM);
 END;
+
+/
