@@ -95,3 +95,4 @@ CREATE TABLE Location(
             montant NUMBER CHECK (montant is NULL OR montant >= 0),
             CHECK (dateRetour is NULL OR dateRetour >= dateDepart)
 );
+
