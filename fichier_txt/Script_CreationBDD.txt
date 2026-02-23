@@ -27,16 +27,16 @@ CREATE SEQUENCE num_categorie_sequence
 
 -- Creation de la table categories --  
 CREATE TABLE Categories (
-            numCat NUMBER(9) PRIMARY KEY,
+            numCat NUMBER PRIMARY KEY,
             categorie VARCHAR2(20) NOT NULL,
-            prixKm NUMBER(9) NOT NULL CHECK ( prixkm>0 )
+            prixKm NUMBER NOT NULL CHECK ( prixkm>0 )
 );
 -- Creation de la table modeles --
 
 CREATE TABLE Modeles(
             modele VARCHAR2(20) PRIMARY KEY NOT NULL,
             marque VARCHAR2(20) NOT NULL,
-            numCat NUMBER(9) REFERENCES Categories(numCat) NOT NULL
+            numCat NUMBER REFERENCES Categories(numCat) NOT NULL
 );
             
         
@@ -44,8 +44,8 @@ CREATE TABLE Modeles(
             
 CREATE TABLE Formules(
             formule VARCHAR2(20) PRIMARY KEY NOT NULL,
-            nbJours NUMBER(9) NOT NULL CHECK ( nbJours >=0 ),
-            forfaitKm NUMBER(9) NOT NULL CHECK (forfaitKm >= 0)
+            nbJours NUMBER NOT NULL CHECK ( nbJours >=0 ),
+            forfaitKm NUMBER NOT NULL CHECK (forfaitKm >= 0)
 );
 
 
@@ -53,18 +53,18 @@ CREATE TABLE Formules(
 -- Creation de la table vehicule --
 
 CREATE TABLE Vehicule( 
-            numVeh NUMBER(9) PRIMARY KEY,
+            numVeh NUMBER PRIMARY KEY,
             modele VARCHAR2(20) REFERENCES Modeles(modele) NOT NULL,
-            km NUMBER(9) NOT NULL CHECK (km >= 0),
+            km NUMBER NOT NULL CHECK (km >= 0),
             situation VARCHAR2(20) CHECK (situation in ('disponible','location','retraite')) NOT NULL,
-            nbJoursLoc NUMBER(9) DEFAULT 0 NOT NULL,
-            CAV NUMBER(9)  DEFAULT 0 CHECK (CAV >= 0) NOT NULL 
+            nbJoursLoc NUMBER DEFAULT 0 NOT NULL,
+            CAV NUMBER  DEFAULT 0 CHECK (CAV >= 0) NOT NULL 
 );
 
 -- Creation de la table vehicule retraite --
 
 CREATE TABLE VehiculeRetraite(
-            numVeh NUMBER(9) Primary Key REFERENCES Vehicule(numVeh),
+            numVeh NUMBER Primary Key REFERENCES Vehicule(numVeh),
             dateRetraite DATE NOT NULL
 );
             
@@ -74,9 +74,9 @@ CREATE TABLE VehiculeRetraite(
 -- Creation de la table tarifs --
 
 CREATE TABLE Tarifs(
-            numCat NUMBER(9)  REFERENCES Categories(numCat) NOT NULL,
+            numCat NUMBER  REFERENCES Categories(numCat) NOT NULL,
             formule VARCHAR2(20)  REFERENCES Formules(formule) NOT NULL,
-            tarif NUMBER(9) CHECK (tarif >= 0) NOT NULL,
+            tarif NUMBER CHECK (tarif >= 0) NOT NULL,
             PRIMARY KEY(numCat,formule)   -- C'est 2 cles primaire
             );
  
@@ -95,4 +95,3 @@ CREATE TABLE Location(
             montant NUMBER CHECK (montant is NULL OR montant >= 0),
             CHECK (dateRetour is NULL OR dateRetour >= dateDepart)
 );
-
