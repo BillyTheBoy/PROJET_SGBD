@@ -5,7 +5,7 @@ BEGIN
          RAISE_APPLICATION_ERROR(-20001, 'L’annulation ne concerne que les locations dont KmLoc est égal à 0');
     END IF;
     UPDATE Vehicule
-    SET situation  = 'disponiblE'
+    SET situation  = 'disponible'
     WHERE numVeh = :OLD.numVeh;
 EXCEPTION
     WHEN OTHERS THEN
