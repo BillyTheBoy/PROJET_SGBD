@@ -76,7 +76,7 @@ CREATE TABLE VehiculeRetraite(
 CREATE TABLE Tarifs(
             numCat NUMBER  REFERENCES Categories(numCat) NOT NULL,
             formule VARCHAR2(20)  REFERENCES Formules(formule) NOT NULL,
-            tarif NUMBER CHECK (tarif >= 0) NOT NULL,
+            tarif NUMBER CHECK (tarif > 0) NOT NULL,
             PRIMARY KEY(numCat,formule)   -- C'est 2 cles primaire
             );
  
