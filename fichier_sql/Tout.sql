@@ -56,8 +56,8 @@ CREATE TABLE Vehicule(
             numVeh NUMBER PRIMARY KEY,
             modele VARCHAR2(20) REFERENCES Modeles(modele) NOT NULL,
             km NUMBER NOT NULL CHECK (km >= 0),
-            situation VARCHAR2(20) CHECK (situation in ('disponible','location','retraite')) NOT NULL,
-            nbJoursLoc NUMBER DEFAULT 0 NOT NULL,
+            situation VARCHAR2(20)  DEFAULT 'disponible' CHECK (situation in ('disponible','location','retraite')) NOT NULL,
+            nbJoursLoc NUMBER DEFAULT 0 CHECK (nbJoursLoc >= 0) NOT NULL,
             CAV NUMBER  DEFAULT 0 CHECK (CAV >= 0) NOT NULL 
 );
 
@@ -91,7 +91,7 @@ CREATE TABLE Location(
             formule VARCHAR2(20) NOT NULL REFERENCES Formules(formule),
             dateDepart DATE NOT NULL,
             dateRetour DATE,
-            kmLoc NUMBER CHECK (kmLoc >= 0),
+            kmLoc NUMBER DEFAULT 0 CHECK (kmLoc >= 0),
             montant NUMBER CHECK (montant is NULL OR montant >= 0),
             CHECK (dateRetour is NULL OR dateRetour >= dateDepart)
 );
@@ -121,7 +121,15 @@ DECLARE
         v_situation vehicule.situation%TYPE;
         v_tarif tarifs.tarif%TYPE;
 BEGIN
+    IF :NEW.kmLoc != 0 THEN 
+        RAISE_APPLICATION_ERROR(-20001, 'KmLoc doit egale a 0');
+    END IF;
+
     SELECT situation INTO v_situation FROM Vehicule WHERE numVEH = :NEW.numVeh;
+    IF v_situation != 'disponible' THEN
+        RAISE_APPLICATION_ERROR(-20002, 'L vehicule n''est pas disponible pour la location');
+    END IF;
+
     SELECT nbJours INTO v_nbjours FROM Formules WHERE  formule = :NEW.formule;
     SELECT T.tarif INTO v_tarif
     FROM tarifs T
@@ -129,28 +137,21 @@ BEGIN
     JOIN Vehicule V ON M.modele = V.modele
     WHERE V.numVeh = :NEW.numVeh AND T.formule = :NEW.formule;
 
-    IF v_situation != 'disponible' THEN
-        RAISE_APPLICATION_ERROR(-20001, 'L vehicule n''est pas disponible pour la location');
-    END IF;
-
     :NEW.dateRetour := v_nbJours + :NEW.dateDepart;
 
     :NEW.numLoc := 'L-'|| num_location_sequence.NEXTVAL;
 
     :NEW.montant := v_tarif;
 
-    :NEW.kmLoc := 0;
-
     UPDATE Vehicule
     SET situation  = 'location'
     WHERE numVeh = :NEW.numVeh;
 
-
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        RAISE_APPLICATION_ERROR(-20002,'Erreur : Aucune donnée trouvées');
+        RAISE_APPLICATION_ERROR(-20003,'Erreur : Aucune donnée trouvées');
     WHEN OTHERS THEN
-        RAISE_APPLICATION_ERROR(-20003, 'Erreur Oracle : ' || SQLCODE || ' ; Message Oracle : ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20004, 'Erreur Oracle : ' || SQLCODE || ' ; Message Oracle : ' || SQLERRM);
 END;
 /
 
@@ -159,16 +160,20 @@ BEFORE INSERT ON Vehicule FOR EACH ROW
 DECLARE
     v_modele NUMBER;
 BEGIN
-    
-
+    IF :NEW.NbJoursLoc != 0 THEN 
+        RAISE_APPLICATION_ERROR(-20001, 'NbJoursLoc doit egale a 0');
+    END IF;
+    IF :NEW.CAV != 0 THEN 
+        RAISE_APPLICATION_ERROR(-20002, 'CAV doit egale a 0');
+    END IF;
+    IF :NEW.situation != 'disponible' THEN 
+        RAISE_APPLICATION_ERROR(-20003, 'Situation doit egale a disponible');
+    END IF;
     :NEW.numVeh := num_vehicule_sequence.NEXTVAL;
-    :NEW.situation := 'disponible';
-    :NEW.NbJoursLoc := 0;
-    :NEW.CAV := 0;
-    
+
 EXCEPTION
     WHEN OTHERS THEN
-        RAISE_APPLICATION_ERROR(-20001, 'Erreur Oracle : ' || SQLCODE || ' ; Message Oracle : ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20004, 'Erreur Oracle : ' || SQLCODE || ' ; Message Oracle : ' || SQLERRM);
 END;
 /
 
