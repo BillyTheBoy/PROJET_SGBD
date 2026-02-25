@@ -87,12 +87,12 @@ CREATE TABLE Tarifs(
 
 CREATE TABLE Location(
             numLoc VARCHAR2(20) PRIMARY KEY,
-            numVeh NUMBER REFERENCES Vehicule(numVeh)NOT NULL ,
+            numVeh NUMBER REFERENCES Vehicule(numVeh) NOT NULL ,
             formule VARCHAR2(20) NOT NULL REFERENCES Formules(formule),
             dateDepart DATE NOT NULL,
             dateRetour DATE,
             kmLoc NUMBER DEFAULT 0 CHECK (kmLoc >= 0),
-            montant NUMBER CHECK (montant is NULL OR montant >= 0),
+            montant NUMBER CHECK (montant >= 0) NOT NULL,
             CHECK (dateRetour is NULL OR dateRetour >= dateDepart)
 );
 
@@ -131,13 +131,20 @@ BEGIN
     END IF;
 
     SELECT nbJours INTO v_nbjours FROM Formules WHERE  formule = :NEW.formule;
+
     SELECT T.tarif INTO v_tarif
     FROM tarifs T
-    JOIN Modeles M ON T.numcat = M.numcat
-    JOIN Vehicule V ON M.modele = V.modele
-    WHERE V.numVeh = :NEW.numVeh AND T.formule = :NEW.formule;
+    WHERE T.formule = :NEW.formule AND numcat IN (
+        SELECT numcat 
+        FROM Modeles M
+        WHERE modele IN (
+            SELECT modele
+            FROM Vehicule
+            WHERE numVeh = :NEW.numVeh
+        )
+    ); 
 
-    :NEW.dateRetour := v_nbJours + :NEW.dateDepart;
+    :NEW.dateRetour := :NEW.dateDepart + v_nbJours;
 
     :NEW.numLoc := 'L-'|| num_location_sequence.NEXTVAL;
 
@@ -157,8 +164,6 @@ END;
 
 CREATE OR REPLACE NONEDITIONABLE TRIGGER insertionVehicule
 BEFORE INSERT ON Vehicule FOR EACH ROW
-DECLARE
-    v_modele NUMBER;
 BEGIN
     IF :NEW.NbJoursLoc != 0 THEN 
         RAISE_APPLICATION_ERROR(-20001, 'NbJoursLoc doit egale a 0');
@@ -206,18 +211,25 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20002, 'Attention : la date de retour a été dépassée pour le véhicule : '||:OLD.Numveh);
     END IF;
     
-    SELECT prixkm INTO c_prixkm 
-    FROM Vehicule V
-    JOIN Modeles M ON V.modele = M.modele
-    JOIN Categories C ON C.Numcat = M.Numcat
-    WHERE V.Numveh = :NEW.Numveh;
-    
+    SELECT prixkm INTO c_prixkm
+    FROM Categories
+    WHERE Numcat IN (
+        SELECT Numcat
+        FROM Modeles
+        WHERE modele IN (
+            SELECT modele
+            FROM Vehicule
+            WHERE Numveh = :NEW.Numveh
+        )
+    );
+
     SELECT forfaitkm INTO f_forfaitkm
     FROM Formules
     WHERE formule = :NEW.formule;
     
     :NEW.Montant := GREATEST(0,:New.KmLoc - f_forfaitkm) * c_prixkm;
-    
+    :NEW.DateRetour := TRUNC(:NEW.DateRetour);
+    :NEW.DateDepart := TRUNC (:NEW.DateDepart);
     UPDATE Vehicule
     SET 
     km = km + :NEW.Kmloc,
