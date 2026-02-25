@@ -56,7 +56,7 @@ CREATE TABLE Vehicule(
             numVeh NUMBER PRIMARY KEY,
             modele VARCHAR2(20) REFERENCES Modeles(modele) NOT NULL,
             km NUMBER NOT NULL CHECK (km >= 0),
-            situation VARCHAR2(20)  DEFAULT 'disponible' CHECK (situation in ('disponible','location','retraite')) NOT NULL,
+            situation VARCHAR2(20)  DEFAULT 'disponible' CHECK (situation IN ('disponible','location','retraite')) NOT NULL,
             nbJoursLoc NUMBER DEFAULT 0 CHECK (nbJoursLoc >= 0) NOT NULL,
             CAV NUMBER  DEFAULT 0 CHECK (CAV >= 0) NOT NULL 
 );
@@ -64,7 +64,7 @@ CREATE TABLE Vehicule(
 -- Creation de la table vehicule retraite --
 
 CREATE TABLE VehiculeRetraite(
-            numVeh NUMBER Primary Key REFERENCES Vehicule(numVeh),
+            numVeh NUMBER PRIMARY KEY REFERENCES Vehicule(numVeh),
             dateRetraite DATE NOT NULL
 );
             
@@ -92,8 +92,8 @@ CREATE TABLE Location(
             dateDepart DATE NOT NULL,
             dateRetour DATE,
             kmLoc NUMBER DEFAULT 0 CHECK (kmLoc >= 0),
-            montant NUMBER CHECK (montant >= 0) NOT NULL,
-            CHECK (dateRetour is NULL OR dateRetour >= dateDepart)
+            montant NUMBER CHECK (montant IS NULL OR montant >0),
+            CHECK (dateRetour IS NULL OR dateRetour >= dateDepart)
 );
 
 CREATE OR REPLACE TRIGGER InsertCategorie
